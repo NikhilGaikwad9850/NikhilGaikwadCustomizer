@@ -1,0 +1,46 @@
+6. REST API Rate Limiting
+Scenario: You are tasked with implementing rate limiting for a REST API endpoint to prevent abuse. The rate limit should be applied per IP address.
+Requirements:
+●	Describe a basic approach to implement rate limiting in a Node.js application.
+Basic Approach to Implement Rate Limiting
+1.	Define Rate Limits: Determine the allowed number of requests per time period (e.g., 100 requests per hour per IP address). This will help you set the parameters for your rate limiting.
+2.	Track Requests: Use a data structure to track the number of requests made by each IP address within the defined time frame. This can be done in memory, in a database, or using a caching mechanism.
+3.	Check Requests: For each incoming request, check the tracked requests for the user's IP address:
+o	If the request count is within the limit, process the request.
+o	If the limit is exceeded, return a response indicating that the rate limit has been exceeded.
+4.	Reset Count: Implement a mechanism to reset the request count after the time period has elapsed.
+Example Implementation
+Here’s a simple example using a middleware approach:
+javascript
+Copy code
+const rateLimit = require('express-rate-limit');
+const express = require('express');
+const app = express();
+const limiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+});
+app.use('/api/', limiter);
+app.get('/api/resource', (req, res) => {
+    res.send('Resource data');
+});
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
+Libraries and Strategies for Rate Limiting
+1.	Express Rate Limit:
+o	Library: express-rate-limit
+o	Description: This is a simple and widely used middleware for Express applications. It allows you to easily implement rate limiting with options for customizing the window size, 
+
+●	What libraries or strategies would you use to handle rate limiting?
+Libraries and Strategies for Rate Limiting
+1.	Express Rate Limit:
+o	Library: express-rate-limit
+o	Description: This is a simple and widely used middleware for Express applications. It allows you to easily implement rate limiting with options for customizing the window size, maximum requests, and response messages.
+2.	Redis for Distributed Rate Limiting:
+o	Library: rate-limiter-flexible or redis
+o	Description: If your application is distributed across multiple instances, consider using Redis to store request counts. rate-limiter-flexible is a versatile library that can be configured to work with Redis, providing a centralized way to manage rate limits across instances.
+3.	Custom In-Memory Solutions:
+o	If your application is simple and doesn't require distributed rate limiting, you could implement a custom in-memory solution using a JavaScript object or a Map to track request counts and timestamps.
