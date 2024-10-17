@@ -1,0 +1,76 @@
+8. Data Validation in TypeScript
+Scenario: You have the following TypeScript function that processes user input:
+ 
+1.	How would you enhance the UserInput interface to include validation rules (e.g., email format)?
+To enhance the UserInput interface and implement effective validation in a TypeScript application, you can follow these steps:
+
+1. Enhancing the UserInput Interface
+You can enhance the UserInput interface by adding validation rules as properties. For example, you might define a type for the validation rules and use it in your interface. Here's how you can do it:
+
+typescript
+Copy code
+interface UserInput {
+    username: string;
+    email: string;
+    password: string;
+}
+interface ValidationRules {
+    username: (value: string) => boolean;
+    email: (value: string) => boolean;
+    password: (value: string) => boolean;
+}
+const validationRules: ValidationRules = {
+    username: (value) => /^[a-zA-Z0-9_]{3,20}$/.test(value), // alphanumeric and underscores, 3-20 chars
+    email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), // basic email format
+    password: (value) => value.length >= 8 // at least 8 characters
+};
+
+2.	Describe a strategy for validating user input in a TypeScript application.
+
+To validate user input effectively in a TypeScript application, you can follow this strategy:
+Step-by-Step Validation Process
+1.	Define the Input Schema: Use interfaces to define the structure of user input, as shown above.
+2.	Create Validation Functions: Implement validation functions that check whether each input field meets the specified criteria. You can use regular expressions for format validation (e.g., for emails).
+3.	Centralized Validation Logic: Create a centralized function that accepts the user input and runs all validation checks. This function should return an object indicating which fields are valid and which are not.
+4.	Error Handling: For invalid inputs, return detailed error messages to inform users about what went wrong. This could be an object mapping field names to error messages.
+5.	Integration with Application Logic: Call the validation function before processing user input in your application (e.g., before storing data in a database or proceeding with further business logic).
+Example Implementation
+Here’s a simplified example:
+typescript
+Copy code
+interface ValidationResult {
+    valid: boolean;
+    errors: { [key: string]: string };
+}
+
+function validateUserInput(input: UserInput): ValidationResult {
+    const errors: { [key: string]: string } = {};
+    let valid = true;
+
+    if (!validationRules.username(input.username)) {
+        valid = false;
+        errors.username = 'Username must be 3-20 characters long and can only contain letters, numbers, and underscores.';
+    }
+    if (!validationRules.email(input.email)) {
+        valid = false;
+        errors.email = 'Invalid email format.';
+    }
+    if (!validationRules.password(input.password)) {
+        valid = false;
+        errors.password = 'Password must be at least 8 characters long.';
+    }
+    return { valid, errors };
+}
+const userInput: UserInput = {
+    username: 'user123',
+    email: 'user@example.com',
+    password: 'password123'
+};
+const validationResult = validateUserInput(userInput);
+if (!validationResult.valid) {
+    console.error('Validation failed:', validationResult.errors);
+} else {
+    console.log('User input is valid!');
+}
+
+
