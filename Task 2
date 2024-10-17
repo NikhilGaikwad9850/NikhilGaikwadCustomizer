@@ -1,0 +1,65 @@
+2. REST API Design
+Scenario: You need to design a REST API endpoint to retrieve user profile information. The endpoint should support fetching a user's profile by their username and include optional query parameters for filtering the results.
+Requirements: v 
+●	Define the endpoint URL and HTTP method.
+Endpoint URL and HTTP Method:
+GET /users/{username}/profile
+HTTP Method: GET
+Endpoint URL: /users/{username}/profile
+Path Parameter: username (required)
+Explanation:
+We use the GET method because we're retrieving data, not modifying it.
+The endpoint URL is structured to clearly indicate that we're retrieving a user's profile information. The {username} path parameter is used to identify the specific user.
+By using a path parameter for the username, we make it easy to cache and optimize the request.
+Optional Query Parameters:
+To support filtering the results, we can add optional query parameters. Here are a few examples:
+fields: a comma-separated list of fields to include in the response (e.g., fields=name,email,location)
+expand: a boolean flag to include additional information, such as the user's friends or followers (e.g., expand=true)
+lang: a language code to return the profile information in a specific language (e.g., lang=fr)
+These query parameters can be added to the URL as follows:
+
+GET /users/{username}/profile?fields=name,email&expand=true&lang=fr
+●	Specify the expected request parameters and response structure.
+Request Parameters
+	Path Parameter:
+                               username: (required) The unique identifier for the user whose profile is being retrieved.
+	Query Parameters (optional):
+o	fields: (optional) A comma-separated list of specific fields to include in the response. For example, fields=firstName,lastName,email.
+o	includePosts: (optional, boolean) A flag indicating whether to include the user’s posts in the response. Defaults to false.
+Response Structure
+•	Success Response (HTTP Status 200):
+json
+Copy code
+{
+  "username": "john_doe",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "bio": "Software Developer",
+  "posts": [] // Only included if includePosts=true
+}
+                                            
+•	Error Response (HTTP Status 404 - Not Found):
+json
+Copy code
+{
+  "error": "User not found",
+  "message": "No user exists with the username 'john_doe'."
+}
+
+•	Error Response for Bad Request (HTTP Status 400):
+json
+Copy code
+{
+  "error": "Invalid input",
+  "message": "Username cannot be empty and must conform to naming conventions."
+}
+
+●	Explain how you would handle errors (e.g., user not found) and validate input.
+Input Validation:
+Ensure the username is provided and is not empty. It should conform to specific naming conventions (e.g., alphanumeric characters, underscores, and a maximum length).
+Validate the fields parameter to ensure it only contains valid field names (e.g., firstName, lastName, etc.).
+Validate the includePosts parameter to ensure it is a boolean.
+Error Handling:
+If the username does not exist in the database, return a 404 Not Found status with an appropriate error message.
+For any invalid inputs (like empty usernames or incorrect field names), return a 400 Bad Request status with details about the validation errors.
