@@ -1,0 +1,49 @@
+4. Concurrency Handling
+Scenario: You are developing a Node.js application where users can book events. The event booking system should prevent double bookings for the same event.
+Requirements:
+●	Describe how you would handle concurrent booking requests to ensure that an event cannot be booked more than once at the same time.
+1. Handling Concurrent Booking Requests
+Application Code:
+•	Mutex Locking: Use a locking mechanism to ensure that only one request can process the booking for a specific event at a time. You can use libraries like async-lock or a similar solution to create a lock around the booking logic.
+•	Atomic Transactions: Leverage atomic transactions to perform the check and insert operation in a single step. This ensures that if two requests check availability at the same time, only one can succeed.
+Example Using Mutex:
+javascript
+Copy code
+const AsyncLock = require('async-lock');
+const lock = new AsyncLock();
+async function bookEvent(eventId, userId) {
+    return lock.acquire(eventId, async () => {
+        const event = await getEventById(eventId); 
+        if (event.isBooked) {
+            throw new Error('Event is already booked.');
+        } 
+        await createBooking(eventId, userId);
+    });
+}
+
+●	Suggest a strategy for implementing this in both the application code and the database schema.
+Schema Design:
+•	Bookings Table: Create a Bookings table that includes fields for eventId, userId, and a timestamp for the booking. You might also include a unique constraint on the combination of eventId and timestamp to ensure that no two bookings can occur for the same event at the same time.
+sql
+Copy code
+CREATE TABLE Bookings (
+    id SERIAL PRIMARY KEY,
+    eventId INT NOT NULL,
+    userId INT NOT NULL,
+    bookingTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (eventId, bookingTime)
+);
+Implementation Strategy:
+•	Use of Unique Constraints: The unique constraint on eventId and bookingTime prevents double bookings at the same timestamp. Adjust the granularity of bookingTime as necessary to your application's requirements.
+•	Optimistic Locking: Alternatively, you could implement optimistic locking where you check if the event is still available before finalizing the booking. If another booking occurs after the check, you can reject the booking attempt.
+Example with Optimistic Locking:
+1.	Check if the event is booked:
+sql
+Copy code
+SELECT * FROM Events WHERE id = $1 AND isBooked = false;
+2.	If available, book the event:
+sql
+Copy code
+INSERT INTO Bookings (eventId, userId) VALUES ($1, $2);
+UPDATE Events SET isBooked = true WHERE id = $1;
+3.	Handle potential conflicts in your application code by catching errors when attempting to insert a duplicate booking.
