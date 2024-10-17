@@ -1,0 +1,36 @@
+3. TypeScript Type Inference
+Scenario: Consider the following TypeScript function:
+ 
+What TypeScript feature is being used to specify the return type of the getUserInfo function?
+The feature being used to specify the return type of the getUserInfo function is explicit return type annotation. In TypeScript, you can explicitly define the return type of a function using a colon followed by the type after the function parameters. This helps with type safety and clarity, making it clear what type the function is expected to return.
+Example:
+typescript
+Copy code
+function getUserInfo(username: string): UserInfo {
+    // function implementation
+}
+In this case, UserInfo is the specified return type, which should be defined elsewhere in the code, typically as an interface or type.
+How would you modify this function to handle cases where the API response might be missing the age property.
+To modify the function to handle cases where the API response might be missing the age property, you can use optional properties in your TypeScript interface definition for the return type. Here's an example of how you could define the UserInfo type and modify the function:
+
+typescript
+Copy code
+interface UserInfo {
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    age?: number; // Make age optional
+}
+async function getUserInfo(username: string): Promise<UserInfo> {
+    const response = await fetch(`https://api.example.com/users/${username}`);
+    const data: UserInfo = await response.json();
+    if (data.age === undefined) {
+        data.age = null; // or any default value you want to assign
+    }
+    return data;
+}
+Key Changes:
+Optional Property: The age property is defined as optional using the ? syntax, which indicates that it may or may not be present in the API response.
+Handling Missing Property: Inside the function, we check if data.age is undefined. If it is, we can set it to null or any default value as needed.
+
